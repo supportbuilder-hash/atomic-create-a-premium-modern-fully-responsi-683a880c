@@ -4,10 +4,10 @@
 
 @layer base {
   :root {
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --border: 240 5.9% 90%;
-    --muted-foreground: 240 3.8% 46.1%;
+    --foreground: #F3F1EC;
+    --card: #12151A;
+    --border: rgba(255, 255, 255, 0.1);
+    --muted-foreground: #9CA3AF;
 
     --primary: #3EE8DB;
     --background: #0B0E11;
@@ -77,7 +77,7 @@
 
 @layer utilities {
   .glass-panel {
-    background-color: rgba(18, 21, 26, 0.55);
+    background-color: rgba(18, 21, 26, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.09);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);

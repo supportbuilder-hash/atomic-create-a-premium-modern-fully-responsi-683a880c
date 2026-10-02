@@ -211,47 +211,32 @@ const STATUS_SEQUENCE: DemoStatus[] = ["Queued", "Running", "Passed", "Needs Rev
 
 const STATUS_STYLES: Record<DemoStatus, { badge: string; icon: typeof Clock; dot: string }> = {
   Queued: {
-    badge: "bg-white/5 text-[var(--muted-foreground)] border-white/10",
+    badge: "bg-white/5 text-[var(--muted-foreground)] border border-white/10",
     icon: Clock,
-    dot: "bg-white/30",
+    dot: "bg-white/40",
   },
   Running: {
-    badge: "bg-[var(--accent-secondary)]/10 text-[var(--accent-secondary)] border-[var(--accent-secondary)]/30",
+    badge: "bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/30",
     icon: Activity,
-    dot: "bg-[var(--accent-secondary)]",
+    dot: "bg-[var(--primary)]",
   },
   Passed: {
-    badge: "bg-[var(--primary)]/10 text-[var(--primary)] border-[var(--primary)]/30",
+    badge: "bg-[var(--primary)]/15 text-[var(--primary)] border border-[var(--primary)]/40",
     icon: Check,
     dot: "bg-[var(--primary)]",
   },
   "Needs Review": {
-    badge: "bg-amber-500/10 text-amber-400 border-amber-500/30",
+    badge: "bg-[var(--accent-secondary)]/15 text-[var(--accent-secondary)] border border-[var(--accent-secondary)]/40",
     icon: AlertTriangle,
-    dot: "bg-amber-400",
+    dot: "bg-[var(--accent-secondary)]",
   },
 };
 
-interface TimelineItem {
-  text: string;
-}
-
-const TIMELINE_RESPONSIBILITIES: TimelineItem[] = [
-  { text: "Test web, mobile, and desktop applications throughout the development lifecycle." },
-  { text: "Design and execute manual and automated test scenarios." },
-  { text: "Build and maintain Playwright browser automation." },
-  { text: "Validate APIs and backend behavior using Postman." },
-  { text: "Perform performance and load-testing exercises with JMeter in approved QA environments." },
-  { text: "Investigate defects and document reproducible steps, evidence, expected behavior, and actual behavior." },
-  { text: "Verify fixes and execute regression testing before releases." },
-  { text: "Collaborate with developers and product stakeholders to clarify requirements and reduce release risk." },
-  { text: "Test complex workflows involving authentication, role-based access, payments, KYC verification, cloud file imports, encryption-related behavior, real-time chat, and AI-generated content." },
-];
-
 interface CaseStudy {
   id: string;
-  name: string;
+  title: string;
   url?: string;
+  kicker: string;
   context: string;
   challenge: string;
   responsibility: string;
@@ -265,108 +250,102 @@ interface CaseStudy {
 const CASE_STUDIES: CaseStudy[] = [
   {
     id: "atomic-builder",
-    name: "Atomic Builder",
+    title: "Atomic Builder",
     url: "https://builder.hotcode.ai/",
+    kicker: "AI-powered product",
     context:
-      "An AI-powered product builder where users describe what they want and the platform generates working output through a multi-step flow.",
+      "Atomic Builder is an AI-assisted build tool where users move through multi-step project creation and generation workflows.",
     challenge:
-      "Generation-based products carry a different kind of risk than standard CRUD apps: state can hang in a generating step, errors need graceful fallback, and every project workflow has to stay predictable across retries.",
+      "Generation states are inherently non-deterministic, so the usual 'expected output equals actual output' approach does not hold. The real risk sits in state transitions, not single screens.",
     responsibility:
-      "I tested the end-to-end user journey, from authentication through project creation to generation states, looking for ways the flow could break or mislead the user.",
+      "I tested the user journeys around authentication, project setup, and generation states, focusing on where the product could silently fail or leave a user stuck.",
     approach:
-      "I combined scripted functional cases for the core happy path with exploratory sessions targeting interrupted actions, like closing a tab mid-generation or submitting invalid input, then checked how the UI recovered.",
+      "I traced each multi-step journey end to end, deliberately interrupting flows midway, resubmitting forms, and testing with invalid or incomplete inputs to see how the system recovered.",
     scenarios: [
-      "Multi-step authentication and session handling",
-      "Project creation and generation state transitions",
-      "Form validation and error handling on bad input",
-      "Loading, timeout, and retry behavior",
-      "Responsive layout across breakpoints",
-      "Regression risk when new generation features shipped",
+      "Authentication edge cases and session handling",
+      "Interrupted or incomplete project workflows",
+      "Validation and error handling on generation requests",
+      "Loading and generation-state behavior under slow conditions",
+      "Responsiveness across breakpoints",
+      "Regression risk after UI changes",
     ],
-    tools: ["Playwright", "Manual exploratory testing", "Browser DevTools"],
+    tools: ["Manual testing", "Exploratory testing", "Browser DevTools"],
     learned:
-      "Generation-based UIs need test design that treats 'in progress' as a first-class state, not an edge case, because that is where most real user frustration shows up.",
+      "Testing AI-driven generation taught me to treat 'in progress' and 'failed silently' as distinct states worth testing on their own, not as footnotes to the happy path.",
   },
   {
-    id: "veridat-ai",
-    name: "VeridatAI",
+    id: "veridatai",
+    title: "VeridatAI",
     url: "https://veridat-demo.daticsai.com/",
+    kicker: "Identity & verification workflows",
     context:
-      "A platform handling identity and KYC-style verification workflows, including document upload, validation, and role-based access to sensitive records.",
+      "VeridatAI handles identity and document verification style workflows, where correctness and access control carry more weight than usual.",
     challenge:
-      "Verification flows need to reject malformed or fraudulent input confidently without blocking legitimate users, and access to sensitive data has to be strictly scoped by role.",
+      "Verification flows combine document handling, validation rules, and role-based access, which means a single broken edge case can expose or block the wrong data for the wrong user.",
     responsibility:
-      "I tested document handling, validation rules, and role-based access paths, with a focus on negative scenarios that a happy-path test plan would miss.",
+      "I tested the KYC-style verification journeys, document upload and validation behavior, and the boundaries between different access roles.",
     approach:
-      "I built a matrix of valid, borderline, and invalid document and data combinations, then walked through each role's permissions to confirm no account could see or act beyond its scope.",
+      "I worked through each role separately, checking what each one could and could not see or do, then layered in negative scenarios like malformed documents, duplicate submissions, and permission mismatches.",
     scenarios: [
-      "Document upload and format validation",
-      "Identity verification edge cases and rejected submissions",
-      "Role-based access boundaries across user types",
-      "Encryption-related behavior on sensitive fields",
-      "Usability of multi-step verification forms",
-      "Negative testing for incomplete or fraudulent-looking input",
+      "Document upload and validation edge cases",
+      "Role-based access boundaries",
+      "Encryption-related behavior at rest and in transit",
+      "Negative and invalid-input scenarios",
+      "Usability of verification steps for non-technical users",
     ],
     tools: ["Manual testing", "Postman", "Browser DevTools"],
     learned:
-      "With identity-sensitive workflows, the negative and boundary cases matter more than the happy path. That is where access-control and validation gaps actually live.",
+      "Working on verification workflows sharpened how I think about role-based access. I now test 'what should be hidden' with the same rigor as 'what should be visible.'",
   },
   {
     id: "qa-assistant",
-    name: "QA Assistant",
+    title: "QA Assistant",
+    kicker: "Personal AI-assisted QA prototype",
     context:
-      "A personal AI-assisted QA prototype. The working core accepts a QA-related request and returns structured guidance, like suggested test cases or risk areas for a described feature.",
+      "QA Assistant is an evolving prototype I'm building to explore how LLMs can support day-to-day QA work, starting with structured guidance generation.",
     challenge:
-      "Turning a plain-language QA request into structured, genuinely useful output, while keeping the system honest about what it can and cannot do yet.",
+      "The working core needs to turn a loosely worded QA request into something structured and actually usable, without overpromising on what an early-stage assistant can do.",
     responsibility:
-      "I designed and tested the current request-to-response pipeline, and I am shaping the roadmap for what gets built next.",
+      "I designed and am testing the core request-to-response flow, and I'm honest with myself about which pieces are built versus planned.",
     approach:
-      "I test the current LLM pipeline with varied QA prompts, from vague feature descriptions to detailed specs, checking that the structured output stays consistent and useful.",
+      "The current build accepts a QA-related request, routes it through processing, and returns structured QA guidance such as suggested test scenarios or risk areas.",
     scenarios: [
-      "Vague versus detailed QA requests",
-      "Structured response consistency across prompt styles",
-      "Handling of unsupported or out-of-scope requests",
+      "Vague or incomplete QA requests",
+      "Requests outside the assistant's intended scope",
+      "Consistency of structured output across similar inputs",
     ],
-    tools: ["Manual testing", "Prompt iteration"],
+    tools: ["Manual testing", "Prompt-level review"],
     learned:
-      "A believable AI-assisted tool should be upfront about what is built versus planned. Overselling early capability erodes trust fast.",
+      "Building this prototype myself gave me a much more grounded view of where AI-assisted QA tooling is genuinely useful today, versus where it still needs a human in the loop.",
   },
   {
     id: "library-management",
-    name: "Library Management System",
+    title: "Library Management System",
+    kicker: "Academic full-stack project",
     context:
-      "An academic full-stack project covering authentication, admin access, book catalog management, issue and return workflows, fines, and due dates.",
+      "An academic project building a library system with authentication, admin access, book management, and issue and return workflows.",
     challenge:
-      "Keeping book inventory, issue records, and fine calculations in sync as users check items in and out, with admin and member roles behaving differently.",
+      "Keeping book availability, fines, and due dates in sync across concurrent issue and return actions, including admin overrides.",
     responsibility:
-      "This was development work, not professional QA experience. I built and tested the application myself as part of coursework.",
+      "I worked on this as a development project, then applied QA thinking to test the workflows I built, which is distinct from my professional QA experience at DaticsAI.",
     approach:
-      "I wrote functional tests for the core flows and manually verified database state after each transaction, since the whole point was catching sync issues between the book catalog and issue records.",
+      "I tested issue and return cycles against the database state directly, checking that fines calculated correctly against due dates and that admin actions did not desync book counts.",
     scenarios: [
-      "Authentication and admin-versus-member access",
-      "Book issue, return, and overdue fine calculation",
-      "Due date tracking and record updates",
+      "Book issue and return cycles",
+      "Fine calculation against due dates",
+      "Admin versus member access boundaries",
       "Database synchronization after concurrent actions",
     ],
-    tools: ["Manual testing", "SQL verification"],
+    tools: ["Manual testing", "SQL checks"],
     learned:
-      "Building the system myself first made me a better tester later. I understood exactly which edge cases around state and timing were worth checking.",
+      "Building and testing the same system made the cost of a missing validation very concrete. It's part of why I now test with implementation risk in mind, not just UI behavior.",
   },
-];
-
-const QA_ASSISTANT_FLOW = ["User Request", "QA Workflow", "LLM Processing", "Structured QA Response"];
-const QA_ASSISTANT_ROADMAP = [
-  "Full RAG over project documentation",
-  "Database persistence for request history",
-  "Browser execution of suggested test cases",
-  "Multi-agent collaboration between QA roles",
-  "Production deployment",
 ];
 
 interface SystemNode {
   id: string;
   label: string;
-  risks: string;
+  risks: string[];
   perspective: string;
 }
 
@@ -374,85 +353,87 @@ const SYSTEM_NODES: SystemNode[] = [
   {
     id: "authentication",
     label: "Authentication",
-    risks: "Session expiry handled inconsistently, password reset abuse, weak lockout behavior.",
+    risks: ["Session fixation", "Weak password recovery", "Token expiry handling"],
     perspective:
-      "I check session boundaries deliberately, what happens on token expiry mid-action, concurrent logins, and failed-attempt lockouts, not just the login form itself.",
+      "I test login, logout, and session expiry together, since the gaps usually show up in the transitions between states, not the states themselves.",
   },
   {
     id: "payments",
     label: "Payments",
-    risks: "Double charges on retry, failed payment states left unclear to the user, currency rounding errors.",
+    risks: ["Double charges", "Failed webhook handling", "Currency rounding"],
     perspective:
-      "I focus on the failure paths: declined cards, network drop mid-transaction, and retry logic, since that is where money gets lost or users get confused.",
+      "I focus on what happens when a payment is interrupted or a webhook is delayed, since that's where money and order state can drift apart.",
   },
   {
     id: "kyc",
     label: "KYC Verification",
-    risks: "False rejections of valid documents, unclear rejection reasons, inconsistent manual review handoff.",
+    risks: ["Document spoofing", "Validation bypass", "Role leakage"],
     perspective:
-      "I test with a spread of valid, borderline, and clearly invalid documents, and I verify the user always gets a clear next step, not a dead end.",
+      "I treat verification steps as access-control problems first and document-processing problems second.",
   },
   {
     id: "rbac",
     label: "Role-Based Access",
-    risks: "Privilege leaks between roles, UI hiding an action without the backend actually blocking it.",
+    risks: ["Privilege escalation", "Stale permissions", "Hidden UI not actually blocked"],
     perspective:
-      "I always test the backend call directly, not just whether a button is hidden, because a hidden button is not the same as an enforced permission.",
+      "I never trust that hiding a button means a role is blocked. I test the underlying request directly for every role.",
   },
   {
     id: "cloud-imports",
     label: "Cloud File Imports",
-    risks: "Large file timeouts, partial imports left in an inconsistent state, unsupported file formats.",
+    risks: ["Partial uploads", "Unsupported formats", "Sync conflicts"],
     perspective:
-      "I test with oversized files, mid-import network loss, and malformed files, then confirm the system either completes cleanly or rolls back, never leaves a half-imported state.",
+      "I test interrupted and oversized imports deliberately, since those are the cases real users actually hit.",
   },
   {
-    id: "real-time-chat",
+    id: "realtime-chat",
     label: "Real-Time Chat",
-    risks: "Message ordering under latency, delivery confirmation gaps, reconnect handling after a dropped connection.",
+    risks: ["Message ordering", "Reconnect handling", "Delivery duplication"],
     perspective:
-      "I test with simulated latency and forced disconnects to see whether messages arrive in order and whether the UI is honest about delivery status.",
+      "I test with deliberately poor network conditions, since most chat bugs only appear mid-reconnect.",
   },
   {
-    id: "ai-generated-content",
+    id: "ai-content",
     label: "AI-Generated Content",
-    risks: "Inconsistent output formatting, silent failures on unsupported prompts, unclear loading and retry states.",
+    risks: ["Inconsistent output", "Silent failures", "Unclear loading states"],
     perspective:
-      "I treat generation output as untrusted input to the rest of the UI. I check how the app handles malformed, empty, or unexpectedly long responses.",
+      "I test generation as a process with states, not a single output, so I can catch 'stuck' and 'silently failed' separately.",
   },
   {
     id: "data-validation",
     label: "Data Validation",
-    risks: "Client-side-only validation, inconsistent error messaging, boundary values accepted incorrectly.",
+    risks: ["Boundary values", "Encoding issues", "Inconsistent server/client rules"],
     perspective:
-      "I always re-send a request past the client validation layer, directly to the API, to confirm the backend enforces the same rules.",
+      "I always test the same validation rule on both the UI and the API, since they drift apart more often than teams expect.",
   },
   {
     id: "error-recovery",
     label: "Error Recovery",
-    risks: "Dead-end error screens, lost form input on failure, unclear retry paths.",
+    risks: ["Lost user input", "Unclear error messaging", "Retry loops"],
     perspective:
-      "I check that an error never costs the user their progress. Form data should survive a failed submission, and there should always be an obvious next step.",
+      "A good error state should tell the user what to do next. I test for that clarity, not just that an error appears.",
   },
   {
     id: "cross-platform",
     label: "Cross-Platform Behavior",
-    risks: "Layout breakage on specific viewport widths, inconsistent touch targets, platform-specific input quirks.",
+    risks: ["Layout breakage", "Platform-specific gestures", "Inconsistent feature parity"],
     perspective:
-      "I prioritize real usage data over testing every combination equally, automating the high-traffic breakpoints and spot-checking the rest manually.",
+      "I compare the same flow across web, mobile, and desktop directly, since subtle parity gaps are easy to miss testing each in isolation.",
   },
 ];
 
 interface ToolGroup {
-  heading: string;
+  id: string;
+  title: string;
   items: string[];
 }
 
 const TOOL_GROUPS: ToolGroup[] = [
-  { heading: "Automation", items: ["Playwright"] },
-  { heading: "API & Performance", items: ["Postman", "JMeter"] },
+  { id: "automation", title: "Automation", items: ["Playwright"] },
+  { id: "api-performance", title: "API & Performance", items: ["Postman", "JMeter"] },
   {
-    heading: "Testing",
+    id: "testing",
+    title: "Testing",
     items: [
       "Manual testing",
       "Functional testing",
@@ -463,233 +444,214 @@ const TOOL_GROUPS: ToolGroup[] = [
     ],
   },
   {
-    heading: "Technical Foundation",
+    id: "technical-foundation",
+    title: "Technical Foundation",
     items: [
       "Front-end development knowledge",
       "Web application architecture",
       "Browser developer tools",
-      "AI & agentic workflow fundamentals",
+      "AI and agentic workflow fundamentals",
     ],
   },
 ];
 
 interface Principle {
+  id: string;
   title: string;
-  text: string;
+  description: string;
 }
 
 const PRINCIPLES: Principle[] = [
   {
+    id: "user-journey",
     title: "Understand the user journey before writing test cases.",
-    text: "I map how a real person actually moves through a feature before I write a single scripted step, so coverage reflects real usage instead of an assumption about it.",
+    description:
+      "I spend time walking through the product the way a real user would before I write a single test case. Cases written without that context tend to test the code, not the experience.",
   },
   {
+    id: "beyond-happy-path",
     title: "Test beyond the happy path.",
-    text: "The happy path is usually the least interesting part of the system. I spend more time on interrupted flows, invalid input, and unexpected navigation.",
+    description:
+      "The happy path almost always works. I spend more time on incomplete actions, invalid data, and interrupted workflows, because that's where real defects live.",
   },
   {
+    id: "reproducible-defects",
     title: "Make every defect easy to reproduce.",
-    text: "A bug report that a developer has to decode is a bug report that gets deprioritized. I write steps, evidence, and expected-versus-actual clearly enough that anyone can reproduce it cold.",
+    description:
+      "A defect report that can't be reproduced wastes everyone's time. I write steps, environment, and evidence clearly enough that anyone on the team can follow them.",
   },
   {
+    id: "automate-wisely",
     title: "Automate stable, valuable regression paths, not everything blindly.",
-    text: "Automation is an investment, not a checkbox. I automate the paths that are stable and high-value, and I leave exploratory judgment to a human where it actually matters.",
+    description:
+      "Not every test deserves automation. I automate the paths that are stable and high-value, and keep exploratory judgment for the areas that still change often.",
   },
 ];
 
+interface ArchitectureStep {
+  id: string;
+  label: string;
+  description: string;
+}
+
+const ARCHITECTURE_STEPS: ArchitectureStep[] = [
+  { id: "request", label: "User Request", description: "A QA-related question or task is submitted in plain language." },
+  { id: "workflow", label: "QA Workflow", description: "The request is routed into a QA-specific processing path." },
+  { id: "llm", label: "LLM Processing", description: "The model reasons about testing scope, risk areas, and structure." },
+  { id: "response", label: "Structured QA Response", description: "The output returns as organized guidance, such as scenarios or risk notes." },
+];
+
+const ROADMAP_ITEMS: string[] = [
+  "Full retrieval-augmented generation (RAG) over project documentation",
+  "Database persistence for request history and generated guidance",
+  "Browser execution to validate suggested scenarios directly",
+  "Multi-agent collaboration between planning and execution roles",
+  "Production deployment with proper access controls",
+];
+
 // ---------------------------------------------------------------------------
-// 3D hero cube
+// Hero 3D cube
 // ---------------------------------------------------------------------------
 
-function QualityCube() {
-  const reduceMotion = useReducedMotion();
-  const [activeLayer, setActiveLayer] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
+function HeroCube() {
+  const reduce = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [activeLayer, setActiveLayer] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
-  const rotateX = useMotionValue(0);
-  const rotateY = useMotionValue(0);
-  const springX = useSpring(rotateX, { stiffness: 60, damping: 18 });
-  const springY = useSpring(rotateY, { stiffness: 60, damping: 18 });
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 80, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 80, damping: 20 });
+  const rotateX = useTransform(springY, [-0.5, 0.5], [12, -12]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-16, 16]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    if (reduceMotion) return;
-    const handlePointerMove = (e: PointerEvent) => {
-      const el = containerRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const relX = (e.clientX - rect.left) / rect.width - 0.5;
-      const relY = (e.clientY - rect.top) / rect.height - 0.5;
-      rotateY.set(relX * 18);
-      rotateX.set(-relY * 18);
-    };
-    window.addEventListener("pointermove", handlePointerMove);
-    return () => window.removeEventListener("pointermove", handlePointerMove);
-  }, [reduceMotion, rotateX, rotateY]);
-
-  useEffect(() => {
-    if (reduceMotion || typeof window === "undefined" || !("DeviceOrientationEvent" in window)) return;
-    const handleOrientation = (e: DeviceOrientationEvent) => {
-      if (e.beta == null || e.gamma == null) return;
-      rotateY.set(Math.max(-18, Math.min(18, e.gamma / 2)));
-      rotateX.set(Math.max(-18, Math.min(18, (e.beta - 45) / 2)));
-    };
-    window.addEventListener("deviceorientation", handleOrientation);
-    return () => window.removeEventListener("deviceorientation", handleOrientation);
-  }, [reduceMotion, rotateX, rotateY]);
-
-  const cycleLayer = useMemo(() => {
-    if (reduceMotion || !mounted) return null;
-    return CUBE_LAYERS[Math.floor(Date.now() / 2400) % CUBE_LAYERS.length]?.id ?? null;
-  }, [reduceMotion, mounted]);
-
-  useEffect(() => {
-    if (reduceMotion || !mounted) return;
-    let index = 0;
+    if (reduce) return;
     const interval = setInterval(() => {
-      index = (index + 1) % CUBE_LAYERS.length;
-      setActiveLayer(CUBE_LAYERS[index]?.id ?? null);
-    }, 2400);
+      setActiveLayer((prev) => (prev + 1) % CUBE_LAYERS.length);
+    }, 2200);
     return () => clearInterval(interval);
-  }, [reduceMotion, mounted]);
+  }, [reduce]);
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (reduce) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(x);
+    mouseY.set(y);
+  };
+
+  const handlePointerLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
 
   if (!mounted) {
-    return (
-      <div className="flex h-72 w-72 items-center justify-center rounded-2xl border border-[var(--border)]/60 bg-white/[0.02]">
-        <div className="h-40 w-40 rounded-xl border border-[var(--primary)]/30 bg-[var(--primary)]/5" />
-      </div>
-    );
+    return <div className="aspect-square w-full max-w-sm" aria-hidden="true" />;
   }
 
   return (
     <div className="flex flex-col items-center gap-4">
       <div
         ref={containerRef}
-        className="relative flex h-72 w-72 items-center justify-center sm:h-80 sm:w-80"
-        style={{ perspective: "900px" }}
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
+        className="relative aspect-square w-full max-w-sm select-none"
+        style={{ perspective: 900 }}
       >
         <motion.div
-          className="relative h-48 w-48 sm:h-56 sm:w-56"
-          style={{
-            transformStyle: "preserve-3d",
-            rotateX: reduceMotion ? 0 : springX,
-            rotateY: reduceMotion ? 0 : springY,
-          }}
-          animate={reduceMotion ? {} : { rotateZ: [0, 2, 0, -2, 0] }}
-          transition={reduceMotion ? undefined : { duration: 12, repeat: Infinity, ease: "easeInOut" }}
+          className="relative h-full w-full rounded-3xl"
+          style={
+            reduce
+              ? undefined
+              : { rotateX, rotateY, transformStyle: "preserve-3d" }
+          }
         >
-          {CUBE_LAYERS.map((layer, index) => {
-            const isActive = activeLayer === layer.id;
-            const offset = (index - (CUBE_LAYERS.length - 1) / 2) * 22;
-            return (
+          <div className="glass-panel absolute inset-4 flex flex-col justify-between gap-2 overflow-hidden rounded-2xl p-5">
+            {CUBE_LAYERS.map((layer, index) => (
               <div
                 key={layer.id}
-                className={`absolute inset-4 rounded-xl border transition-colors duration-700 ${
-                  isActive
-                    ? "border-[var(--primary)]/70 bg-[var(--primary)]/10 shadow-[0_0_40px_-10px_rgba(62,232,219,0.5)]"
-                    : "border-white/10 bg-white/[0.02]"
+                className={`relative flex items-center justify-between rounded-lg border px-4 py-3 text-xs font-medium tracking-wide transition-colors duration-500 ${
+                  index === activeLayer
+                    ? "border-[var(--primary)]/50 bg-[var(--primary)]/10 text-[var(--primary)]"
+                    : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)]"
                 }`}
-                style={{
-                  transform: `translateZ(${offset}px)`,
-                }}
               >
-                <span
-                  className={`absolute left-2 top-2 text-[10px] uppercase tracking-wider transition-colors duration-700 ${
-                    isActive ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]"
+                <span>{layer.label}</span>
+                <Circle
+                  className={`h-2.5 w-2.5 transition-colors duration-500 ${
+                    index === activeLayer ? "fill-[var(--primary)] text-[var(--primary)]" : "fill-white/20 text-white/20"
                   }`}
-                >
-                  {layer.label}
-                </span>
+                />
+                {index === activeLayer && !reduce && (
+                  <motion.div
+                    className="pointer-events-none absolute inset-y-0 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--primary)]/25 to-transparent"
+                    initial={{ x: "-100%" }}
+                    animate={{ x: "300%" }}
+                    transition={{ duration: 1.8, ease: "easeInOut" }}
+                  />
+                )}
               </div>
-            );
-          })}
-          {!reduceMotion && (
-            <motion.div
-              className="absolute inset-x-4 h-px bg-gradient-to-r from-transparent via-[var(--primary)]/70 to-transparent"
-              style={{ transform: "translateZ(30px)" }}
-              animate={{ top: ["8%", "92%", "8%"] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            />
-          )}
+            ))}
+          </div>
         </motion.div>
       </div>
-      <p className="flex items-center gap-2 text-xs font-medium tracking-wide text-[var(--muted-foreground)]">
-        <span className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-        Testing beyond the happy path.
+      <p className="text-center text-sm italic text-[var(--muted-foreground)]">
+        "Testing beyond the happy path."
       </p>
     </div>
   );
 }
 
 // ---------------------------------------------------------------------------
-// Section pieces
+// Page
 // ---------------------------------------------------------------------------
 
-function SectionKicker({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--primary)]">
-      {children}
-    </span>
-  );
-}
-
-function SectionHeading({
-  kicker,
-  title,
-  description,
-}: {
-  kicker: string;
-  title: string;
-  description?: string;
-}) {
-  return (
-    <div className="max-w-2xl">
-      <SectionKicker>{kicker}</SectionKicker>
-      <h2 className="mt-3 text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
-        {title}
-      </h2>
-      {description ? (
-        <p className="mt-4 text-pretty leading-relaxed text-[var(--muted-foreground)]">{description}</p>
-      ) : null}
-    </div>
-  );
-}
-
-function IconBox({ icon: Icon }: { icon: typeof FileText }) {
-  return (
-    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[var(--primary)]/25 bg-[var(--primary)]/10 text-[var(--primary)]">
-      <Icon className="h-5 w-5" aria-hidden="true" />
-    </span>
-  );
-}
-
 export default function Home() {
-  const [selectedDiscipline, setSelectedDiscipline] = useState<string>(EXPERTISE[0].id);
-  const [activeWorkflowStep, setActiveWorkflowStep] = useState<string | null>(null);
-  const [selectedNode, setSelectedNode] = useState<string>(SYSTEM_NODES[0].id);
+  const [activeDiscipline, setActiveDiscipline] = useState<string>(EXPERTISE[0].id);
+  const [activeNode, setActiveNode] = useState<string>(SYSTEM_NODES[0].id);
+  const [activeArchStep, setActiveArchStep] = useState<string>(ARCHITECTURE_STEPS[0].id);
   const [demoChecks, setDemoChecks] = useState<DemoCheck[]>(INITIAL_DEMO_CHECKS);
   const [demoRunning, setDemoRunning] = useState(false);
-  const [qaFlowStep, setQaFlowStep] = useState(0);
+  const workflowRef = useRef<HTMLDivElement>(null);
+  const [workflowActive, setWorkflowActive] = useState(false);
 
-  const activeDiscipline = useMemo(
-    () => EXPERTISE.find((item) => item.id === selectedDiscipline) ?? EXPERTISE[0],
-    [selectedDiscipline]
+  const selectedDiscipline = useMemo(
+    () => EXPERTISE.find((item) => item.id === activeDiscipline) ?? EXPERTISE[0],
+    [activeDiscipline]
   );
 
-  const activeNode = useMemo(
-    () => SYSTEM_NODES.find((node) => node.id === selectedNode) ?? SYSTEM_NODES[0],
-    [selectedNode]
+  const selectedNode = useMemo(
+    () => SYSTEM_NODES.find((item) => item.id === activeNode) ?? SYSTEM_NODES[0],
+    [activeNode]
+  );
+
+  const selectedArchStep = useMemo(
+    () => ARCHITECTURE_STEPS.find((item) => item.id === activeArchStep) ?? ARCHITECTURE_STEPS[0],
+    [activeArchStep]
   );
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setQaFlowStep((prev) => (prev + 1) % QA_ASSISTANT_FLOW.length);
-    }, 2200);
-    return () => clearInterval(interval);
+    const node = workflowRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setWorkflowActive(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
   }, []);
 
   const runDemo = () => {
@@ -697,73 +659,76 @@ export default function Home() {
     setDemoRunning(true);
     setDemoChecks(INITIAL_DEMO_CHECKS.map((check) => ({ ...check, status: "Queued" })));
 
-    INITIAL_DEMO_CHECKS.forEach((check, checkIndex) => {
-      STATUS_SEQUENCE.forEach((status, statusIndex) => {
-        const finalStatus: DemoStatus =
-          checkIndex % 3 === 2 && status === "Passed" ? "Needs Review" : status;
-        setTimeout(() => {
-          setDemoChecks((prev) =>
-            prev.map((item) => (item.id === check.id ? { ...item, status: finalStatus } : item))
-          );
-          if (checkIndex === INITIAL_DEMO_CHECKS.length - 1 && statusIndex === STATUS_SEQUENCE.length - 1) {
-            setDemoRunning(false);
-          }
-        }, (checkIndex * 350) + statusIndex * 650);
-      });
+    const finalStatuses: DemoStatus[] = ["Passed", "Passed", "Needs Review", "Passed"];
+
+    demoChecks.forEach((_, index) => {
+      const baseDelay = index * 650;
+      setTimeout(() => {
+        setDemoChecks((prev) =>
+          prev.map((check, i) => (i === index ? { ...check, status: "Running" } : check))
+        );
+      }, baseDelay + 300);
+      setTimeout(() => {
+        setDemoChecks((prev) =>
+          prev.map((check, i) =>
+            i === index ? { ...check, status: finalStatuses[index] ?? "Passed" } : check
+          )
+        );
+      }, baseDelay + 1200);
     });
+
+    setTimeout(() => setDemoRunning(false), INITIAL_DEMO_CHECKS.length * 650 + 1200);
   };
 
   return (
-    <main className="bg-ambient min-h-screen overflow-x-hidden pt-24 text-[var(--foreground)]">
+    <main className="bg-ambient min-h-screen text-[var(--foreground)]">
+      {/* ----------------------------------------------------------------- */}
       {/* Hero */}
-      <section className="relative mx-auto max-w-6xl px-6 py-20 md:py-28">
-        <div className="grid items-center gap-16 lg:grid-cols-[1.15fr_0.85fr] lg:gap-20">
+      {/* ----------------------------------------------------------------- */}
+      <section id="hero" className="relative overflow-hidden px-6 pb-24 pt-36 md:pt-44">
+        <div className="mx-auto grid max-w-6xl gap-16 md:grid-cols-[1.1fr_0.9fr] md:items-center">
           <motion.div
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
-            className="flex flex-col items-start gap-5"
           >
             <motion.div
               variants={fadeInUp}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--border)]/60 bg-white/[0.03] px-3.5 py-1.5"
+              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-4 py-1.5 text-xs font-medium text-[var(--muted-foreground)]"
             >
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--primary)]/60" />
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[var(--primary)]/60 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-[var(--primary)]" />
               </span>
-              <span className="text-xs font-medium text-[var(--muted-foreground)]">
-                Based in Lahore, Pakistan
-              </span>
+              Open to new QA opportunities
             </motion.div>
 
             <motion.h1
               variants={fadeInUp}
-              className="text-balance font-[family-name:var(--font-display)] text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl"
+              className="mt-6 text-balance font-[family-name:var(--font-display)] text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl md:text-6xl"
             >
               {APP_NAME}
             </motion.h1>
-
             <motion.p
               variants={fadeInUp}
-              className="font-[family-name:var(--font-display)] text-lg font-medium text-[var(--primary)] sm:text-xl"
+              className="mt-3 text-lg font-medium text-[var(--primary)] md:text-xl"
             >
               {TAGLINE}
             </motion.p>
 
             <motion.p
               variants={fadeInUp}
-              className="max-w-xl text-pretty text-base leading-relaxed text-[var(--muted-foreground)] sm:text-lg"
+              className="mt-6 max-w-xl text-pretty text-base leading-relaxed text-[var(--muted-foreground)] md:text-lg"
             >
-              I test products from the user&apos;s perspective and the system&apos;s edge
-              cases, turning unclear behavior into reproducible bugs, reliable automated
-              checks, and better releases.
+              I test products from the user's perspective and the system's edge cases, turning
+              unclear behavior into reproducible bugs, reliable automated checks, and better
+              releases.
             </motion.p>
 
-            <motion.div variants={fadeInUp} className="mt-2 flex flex-wrap items-center gap-3">
+            <motion.div variants={fadeInUp} className="mt-9 flex flex-wrap items-center gap-4">
               <a
                 href="#case-studies"
-                className="btn-primary-glow inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[#0B0E11] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/60"
+                className="btn-primary-glow inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[var(--background)] transition-transform duration-300 hover:-translate-y-0.5"
               >
                 View My Work
                 <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -771,22 +736,22 @@ export default function Home() {
               <a
                 href={RESUME_URL}
                 download
-                className="btn-secondary-outline inline-flex min-h-11 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+                className="btn-secondary-outline inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition-colors duration-300 hover:border-white/30"
               >
-                <Download className="h-4 w-4" aria-hidden="true" />
                 Download Résumé
+                <Download className="h-4 w-4" aria-hidden="true" />
               </a>
             </motion.div>
 
             <motion.div
               variants={fadeInUp}
-              className="mt-2 flex flex-wrap items-center gap-5 text-sm text-[var(--muted-foreground)]"
+              className="mt-8 flex flex-wrap items-center gap-5 text-sm text-[var(--muted-foreground)]"
             >
               <a
                 href={LINKEDIN_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 transition-colors duration-200 hover:text-[var(--foreground)]"
+                className="flex items-center gap-2 transition-colors duration-200 hover:text-[var(--primary)]"
               >
                 <Linkedin className="h-4 w-4" aria-hidden="true" />
                 LinkedIn
@@ -795,14 +760,14 @@ export default function Home() {
                 href={GITHUB_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1.5 transition-colors duration-200 hover:text-[var(--foreground)]"
+                className="flex items-center gap-2 transition-colors duration-200 hover:text-[var(--primary)]"
               >
                 <Github className="h-4 w-4" aria-hidden="true" />
                 GitHub
               </a>
               <a
                 href={`mailto:${EMAIL}`}
-                className="flex items-center gap-1.5 transition-colors duration-200 hover:text-[var(--foreground)]"
+                className="flex items-center gap-2 transition-colors duration-200 hover:text-[var(--primary)]"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
                 {EMAIL}
@@ -814,409 +779,527 @@ export default function Home() {
             variants={scaleIn}
             initial="hidden"
             animate="visible"
-            className="flex items-center justify-center lg:justify-end"
+            className="flex justify-center"
           >
-            <QualityCube />
+            <HeroCube />
           </motion.div>
         </div>
       </section>
 
-      <div className="section-divider mx-auto max-w-6xl" />
-
+      {/* ----------------------------------------------------------------- */}
       {/* About */}
-      <section id="about" className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-        <Reveal>
-          <SectionHeading kicker="About" title="Quality work, grounded in practice" />
-        </Reveal>
-        <Reveal delay={0.1}>
-          <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:gap-16">
-            <div className="space-y-5 text-pretty leading-relaxed text-[var(--muted-foreground)]">
+      {/* ----------------------------------------------------------------- */}
+      <section id="about" className="border-t border-white/5 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-4xl">
+          <Reveal>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              About
+            </span>
+            <h2 className="mt-3 text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Quality is a design problem, not an afterthought.
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <div className="mt-8 space-y-5 text-pretty text-base leading-relaxed text-[var(--muted-foreground)] md:text-lg">
               <p>
-                I currently work at <span className="text-[var(--foreground)]">DaticsAI</span>,
-                where I test web, mobile, and desktop applications across the development
-                lifecycle. Most of my week is split between manual exploratory sessions,
-                Playwright automation, and keeping regression suites healthy as the product
-                changes underneath them.
+                I currently work as a Software Development Engineer in Test at{" "}
+                <span className="font-medium text-[var(--foreground)]">DaticsAI</span>, where I test
+                web, mobile, and desktop applications throughout their development lifecycle.
+                Day to day that means a mix of manual testing, browser automation with
+                Playwright, API validation, and performance checks, depending on what the
+                release actually needs.
               </p>
               <p>
-                My day-to-day covers browser automation, API validation, performance checks
-                with JMeter, and defect investigation, writing up reproducible steps, expected
-                versus actual behavior, and the evidence a developer needs to act without
-                asking follow-up questions. I work closely with developers and product
-                stakeholders to clarify requirements before they turn into bugs.
+                I spend a lot of time on regression coverage and defect investigation,
+                because that is where releases usually get derailed. I write reports that
+                include clear reproduction steps and evidence, and I work closely with
+                developers and product stakeholders to make sure requirements are
+                understood before a test case is even written.
               </p>
               <p>
-                Before focusing on QA, I spent time doing front-end development, and that
-                background still shows up in how I work. I can read a component tree, trace a
-                rendering issue, and talk to a development team in terms they do not have to
-                translate for me.
+                My earlier front-end development background still shapes how I work. It
+                helps me investigate UI problems faster, read a stack trace without
+                guessing, and have more precise conversations with developers about what is
+                actually happening under the hood.
               </p>
             </div>
-            <div className="glass-panel p-6 md:p-8">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
-                What I bring
-              </h3>
-              <ul className="mt-5 space-y-4">
-                {[
-                  "Manual and automation testing across web, mobile, and desktop",
-                  "Playwright browser automation and API testing with Postman",
-                  "Performance and load testing with JMeter",
-                  "Clear defect reporting developers can act on directly",
-                  "Front-end literacy for faster UI investigation",
-                ].map((line) => (
-                  <li key={line} className="flex gap-3 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                    <ChevronRight className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" aria-hidden="true" />
-                    <span>{line}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </section>
 
+      {/* ----------------------------------------------------------------- */}
       {/* Testing expertise matrix */}
-      <section id="expertise-matrix" className="border-t border-[var(--border)]/40 bg-white/[0.015] px-6 py-24 md:py-32">
+      {/* ----------------------------------------------------------------- */}
+      <section id="expertise-matrix" className="border-t border-white/5 bg-white/[0.015] px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <SectionHeading
-              kicker="Testing Expertise"
-              title="Ten disciplines, one practical approach"
-              description="Select an area to see how I actually approach it, not a textbook definition."
-            />
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Expertise
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Ten testing disciplines, one way of thinking.
+            </h2>
+            <p className="mt-4 max-w-2xl text-pretty leading-relaxed text-[var(--muted-foreground)]">
+              Select an area to see how I actually approach it, not a textbook definition.
+            </p>
           </Reveal>
 
-          <div className="mt-10 grid gap-8 lg:grid-cols-[0.95fr_1.3fr]">
+          <div className="mt-12 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
             <Reveal delay={0.05}>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-                {EXPERTISE.map((item) => {
-                  const isActive = item.id === selectedDiscipline;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => setSelectedDiscipline(item.id)}
-                      aria-pressed={isActive}
-                      className={`rounded-xl border p-4 text-left text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50 ${
-                        isActive
-                          ? "border-[var(--primary)]/60 bg-[var(--primary)]/10 text-[var(--foreground)] shadow-[0_0_28px_-10px_rgba(62,232,219,0.4)]"
-                          : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)] hover:border-white/20 hover:text-[var(--foreground)]"
-                      }`}
-                    >
-                      {item.title}
-                    </button>
-                  );
-                })}
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2">
+                {EXPERTISE.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveDiscipline(item.id)}
+                    aria-pressed={activeDiscipline === item.id}
+                    className={`rounded-xl border px-4 py-3 text-left text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50 ${
+                      activeDiscipline === item.id
+                        ? "border-[var(--primary)]/40 bg-[var(--primary)]/10 text-[var(--primary)]"
+                        : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)] hover:border-white/20 hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    {item.title}
+                  </button>
+                ))}
               </div>
             </Reveal>
 
             <Reveal delay={0.1}>
-              <div className="glass-panel h-full p-6 md:p-8">
-                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                  {activeDiscipline.title}
-                </span>
-                <p className="mt-3 text-base font-medium text-[var(--foreground)]">
-                  {activeDiscipline.summary}
+              <motion.div
+                key={selectedDiscipline.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="glass-panel h-full p-8"
+              >
+                <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[var(--foreground)]">
+                  {selectedDiscipline.title}
+                </h3>
+                <p className="mt-2 text-sm font-medium text-[var(--primary)]">
+                  {selectedDiscipline.summary}
                 </p>
-                <p className="mt-4 text-pretty leading-relaxed text-[var(--muted-foreground)]">
-                  {activeDiscipline.approach}
+                <p className="mt-5 text-pretty leading-relaxed text-[var(--muted-foreground)]">
+                  {selectedDiscipline.approach}
                 </p>
-              </div>
+              </motion.div>
             </Reveal>
           </div>
         </div>
       </section>
 
-      {/* Automation lab */}
-      <section id="automation-lab" className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-        <Reveal>
-          <SectionHeading
-            kicker="Automation Lab"
-            title="From requirement to regression coverage"
-            description="A realistic Playwright workflow, from the first requirement to coverage that protects future releases."
-          />
-        </Reveal>
-
-        <Reveal delay={0.1}>
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="mt-10 flex flex-wrap items-stretch gap-3"
-          >
-            {WORKFLOW_STEPS.map((step, index) => {
-              const Icon = step.icon;
-              const isActive = activeWorkflowStep === step.id;
-              return (
-                <motion.div key={step.id} variants={fadeInUp} className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setActiveWorkflowStep(isActive ? null : step.id)}
-                    aria-pressed={isActive}
-                    className={`glass-panel flex min-h-11 items-center gap-2 rounded-xl px-4 py-3 text-xs font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50 ${
-                      isActive
-                        ? "border-[var(--primary)]/60 bg-[var(--primary)]/10 text-[var(--foreground)]"
-                        : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    <Icon className={`h-4 w-4 ${isActive ? "text-[var(--primary)]" : ""}`} aria-hidden="true" />
-                    {step.label}
-                  </button>
-                  {index < WORKFLOW_STEPS.length - 1 ? (
-                    <ChevronRight className="h-4 w-4 shrink-0 text-[var(--muted-foreground)]/50" aria-hidden="true" />
-                  ) : null}
-                </motion.div>
-              );
-            })}
-          </motion.div>
-        </Reveal>
-
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:gap-10">
-          <Reveal delay={0.1}>
-            <div className="glass-panel overflow-hidden">
-              <div className="flex items-center gap-2 border-b border-white/10 px-5 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-red-400/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-amber-400/70" />
-                <span className="h-2.5 w-2.5 rounded-full bg-[var(--primary)]/70" />
-                <span className="ml-2 text-xs text-[var(--muted-foreground)]">checkout.spec.ts</span>
-              </div>
-              <pre className="overflow-x-auto p-5 text-xs leading-relaxed text-[var(--muted-foreground)] sm:text-sm">
-                <code>
-                  <span className="text-[var(--primary)]">import</span>{" "}
-                  {"{ test, expect } "}
-                  <span className="text-[var(--primary)]">from</span> &apos;@playwright/test&apos;;
-                  {"\n\n"}
-                  <span className="text-[var(--primary)]">test</span>
-                  {"('user can complete checkout with saved card', async ({ page }) => {\n"}
-                  {"  await page.goto('/checkout');\n"}
-                  {"  await page.getByLabel('Card number').fill('4242 4242 4242 4242');\n"}
-                  {"  await page.getByRole('button', { name: 'Place order' }).click();\n\n"}
-                  {"  await expect(page.getByText('Order confirmed')).toBeVisible();\n"}
-                  {"  await expect(page).toHaveURL(/\\/orders\\/\\d+/);\n"}
-                  {"});"}
-                </code>
-              </pre>
-            </div>
+      {/* ----------------------------------------------------------------- */}
+      {/* Automation laboratory */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="automation-lab" className="border-t border-white/5 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Automation Lab
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              From requirement to regression coverage.
+            </h2>
           </Reveal>
 
-          <Reveal delay={0.15}>
-            <div className="glass-panel p-6 md:p-8">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
-                  Interactive demonstration
-                </h3>
-                <button
-                  type="button"
-                  onClick={runDemo}
-                  disabled={demoRunning}
-                  className="btn-secondary-outline inline-flex min-h-9 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--foreground)] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {demoRunning ? "Running…" : "Run demo"}
-                </button>
-              </div>
-              <p className="mt-2 text-xs text-[var(--muted-foreground)]">
-                Fictional checks for illustration only, not live production data.
-              </p>
-              <ul className="mt-5 space-y-3">
-                {demoChecks.map((check) => {
-                  const style = STATUS_STYLES[check.status];
-                  const StatusIcon = style.icon;
-                  return (
-                    <li
-                      key={check.id}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3"
+          <div ref={workflowRef} className="mt-14 overflow-x-auto pb-4">
+            <div className="flex min-w-[760px] items-center gap-2">
+              {WORKFLOW_STEPS.map((step, index) => {
+                const Icon = step.icon;
+                return (
+                  <div key={step.id} className="flex flex-1 items-center gap-2">
+                    <motion.div
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={workflowActive ? { opacity: 1, y: 0 } : {}}
+                      transition={{ duration: 0.4, delay: index * 0.1, ease: "easeOut" }}
+                      className="glass-panel flex flex-1 flex-col items-center gap-3 px-3 py-5 text-center"
                     >
-                      <span className="text-sm text-[var(--foreground)]">{check.name}</span>
-                      <span
-                        className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${style.badge}`}
-                      >
-                        <StatusIcon className="h-3 w-3" aria-hidden="true" />
-                        {check.status}
+                      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--primary)]/30 bg-[var(--primary)]/10 text-[var(--primary)]">
+                        <Icon className="h-4 w-4" aria-hidden="true" />
                       </span>
-                    </li>
-                  );
-                })}
-              </ul>
+                      <span className="text-xs font-medium leading-tight text-[var(--muted-foreground)]">
+                        {step.label}
+                      </span>
+                    </motion.div>
+                    {index < WORKFLOW_STEPS.length - 1 && (
+                      <ChevronRight className="h-4 w-4 flex-shrink-0 text-white/15" aria-hidden="true" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="mt-14 grid gap-8 lg:grid-cols-2">
+            <Reveal>
+              <div className="glass-panel overflow-hidden">
+                <div className="flex items-center gap-2 border-b border-white/10 bg-white/[0.02] px-5 py-3">
+                  <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-white/20" />
+                  <span className="ml-2 text-xs text-[var(--muted-foreground)]">checkout.spec.ts</span>
+                </div>
+                <pre className="overflow-x-auto p-5 text-xs leading-relaxed text-[var(--muted-foreground)] md:text-sm">
+                  <code>
+                    {PLAYWRIGHT_SAMPLE.split("\n").map((line, i) => (
+                      <div key={i} className="whitespace-pre">
+                        {line.includes("import") || line.includes("test(") || line.includes("await") ? (
+                          <span className="text-[var(--primary)]">{line}</span>
+                        ) : (
+                          <span>{line}</span>
+                        )}
+                      </div>
+                    ))}
+                  </code>
+                </pre>
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <div className="glass-panel p-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+                    Demonstration Test Run
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={runDemo}
+                    disabled={demoRunning}
+                    className="rounded-full border border-[var(--primary)]/30 bg-[var(--primary)]/10 px-4 py-1.5 text-xs font-semibold text-[var(--primary)] transition-colors duration-300 hover:bg-[var(--primary)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {demoRunning ? "Running..." : "Run Demo"}
+                  </button>
+                </div>
+                <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+                  Interactive demonstration only, not live production data.
+                </p>
+                <div className="mt-5 space-y-2.5">
+                  {demoChecks.map((check) => {
+                    const style = STATUS_STYLES[check.status];
+                    const StatusIcon = style.icon;
+                    return (
+                      <div
+                        key={check.id}
+                        className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.02] px-4 py-3"
+                      >
+                        <span className="text-sm text-[var(--foreground)]">{check.name}</span>
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${style.badge}`}
+                        >
+                          <StatusIcon className="h-3 w-3" aria-hidden="true" />
+                          {check.status}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </Reveal>
+          </div>
+
+          <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {LAB_CARDS.map((card, index) => {
+              const Icon = card.icon;
+              return (
+                <Reveal key={card.id} delay={index * 0.05}>
+                  <div className="glass-panel glass-panel-hover h-full p-6">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-full border border-[var(--primary)]/30 bg-[var(--primary)]/10 text-[var(--primary)]">
+                      <Icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <h3 className="mt-4 font-[family-name:var(--font-display)] text-base font-semibold">
+                      {card.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                      {card.description}
+                    </p>
+                  </div>
+                </Reveal>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Professional experience */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="experience-timeline" className="border-t border-white/5 bg-white/[0.015] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-4xl">
+          <Reveal>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Experience
+            </span>
+            <h2 className="mt-3 text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Software Development Engineer in Test
+            </h2>
+            <p className="mt-2 text-sm font-medium text-[var(--primary)]">DaticsAI</p>
+          </Reveal>
+
+          <Reveal delay={0.1}>
+            <div className="relative mt-10 border-l border-white/10 pl-8">
+              {[
+                "Test web, mobile, and desktop applications throughout the development lifecycle.",
+                "Design and execute manual and automated test scenarios.",
+                "Build and maintain Playwright browser automation.",
+                "Validate APIs and backend behavior using Postman.",
+                "Perform performance and load-testing exercises with JMeter in approved QA environments.",
+                "Investigate defects and document reproducible steps, evidence, expected behavior, and actual behavior.",
+                "Verify fixes and execute regression testing before releases.",
+                "Collaborate with developers and product stakeholders to clarify requirements and reduce release risk.",
+                "Test complex workflows involving authentication, role-based access, payments, KYC verification, cloud file imports, encryption-related behavior, real-time chat, and AI-generated content.",
+              ].map((item, index) => (
+                <div key={index} className="relative pb-7 last:pb-0">
+                  <span className="absolute -left-[2.3rem] top-1.5 h-2.5 w-2.5 rounded-full border-2 border-[var(--background)] bg-[var(--primary)]" />
+                  <p className="text-pretty leading-relaxed text-[var(--muted-foreground)]">{item}</p>
+                </div>
+              ))}
             </div>
           </Reveal>
         </div>
-
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {LAB_CARDS.map((card) => (
-            <motion.div
-              key={card.id}
-              variants={fadeInUp}
-              className="glass-panel glass-panel-hover p-6 md:p-8"
-            >
-              <IconBox icon={card.icon} />
-              <h3 className="mt-4 text-base font-semibold text-[var(--foreground)]">{card.title}</h3>
-              <p className="mt-2 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
-                {card.description}
-              </p>
-            </motion.div>
-          ))}
-        </motion.div>
       </section>
 
+      {/* ----------------------------------------------------------------- */}
       {/* Case studies */}
-      <section id="case-studies" className="border-t border-[var(--border)]/40 bg-white/[0.015] px-6 py-24 md:py-32">
+      {/* ----------------------------------------------------------------- */}
+      <section id="case-studies" className="border-t border-white/5 px-6 py-24 md:py-32">
         <div className="mx-auto max-w-6xl">
           <Reveal>
-            <SectionHeading
-              kicker="Case Studies"
-              title="Products, not just checklists"
-              description="Story-based breakdowns of what I actually tested, not generic project cards."
-            />
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Case Studies
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Real products, real testing decisions.
+            </h2>
           </Reveal>
 
-          <div className="mt-12 space-y-10">
+          <div className="mt-14 space-y-16">
             {CASE_STUDIES.map((study, index) => (
               <Reveal key={study.id} delay={index * 0.05}>
-                <div className="glass-panel p-6 md:p-8">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="font-[family-name:var(--font-display)] text-xl font-semibold text-[var(--foreground)] sm:text-2xl">
-                      {study.name}
+                <article
+                  className={`glass-panel grid gap-8 p-8 md:p-10 lg:grid-cols-[0.8fr_1.2fr] ${
+                    study.id === "qa-assistant" ? "border-[var(--accent-secondary)]/20" : ""
+                  }`}
+                >
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+                      {study.kicker}
+                    </span>
+                    <h3 className="mt-2 font-[family-name:var(--font-display)] text-2xl font-semibold tracking-tight">
+                      {study.title}
                     </h3>
-                    {study.url ? (
+                    {study.url && (
                       <a
                         href={study.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.02] px-3.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)] transition-colors duration-200 hover:border-[var(--primary)]/40 hover:text-[var(--foreground)]"
+                        className="mt-2 inline-flex items-center gap-1 text-sm text-[var(--primary)] hover:underline"
                       >
-                        Visit site
+                        {study.url.replace("https://", "")}
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                       </a>
-                    ) : (
-                      <span className="rounded-full border border-[var(--accent-secondary)]/30 bg-[var(--accent-secondary)]/10 px-3.5 py-1.5 text-xs font-semibold text-[var(--accent-secondary)]">
-                        Personal project
-                      </span>
                     )}
-                  </div>
 
-                  <div className="mt-6 grid gap-8 lg:grid-cols-2">
-                    <div className="space-y-5">
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Product context
-                        </h4>
-                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">{study.context}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Quality challenge
-                        </h4>
-                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">{study.challenge}</p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Rao&apos;s responsibility
-                        </h4>
-                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">
-                          {study.responsibility}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Testing approach
-                        </h4>
-                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">{study.approach}</p>
-                      </div>
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {study.tools.map((tool) => (
+                        <span
+                          key={tool}
+                          className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-[var(--muted-foreground)]"
+                        >
+                          {tool}
+                        </span>
+                      ))}
                     </div>
 
-                    <div className="space-y-5">
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Important scenarios
-                        </h4>
-                        <ul className="mt-2 space-y-1.5">
-                          {study.scenarios.map((scenario) => (
-                            <li
-                              key={scenario}
-                              className="flex gap-2 text-sm leading-relaxed text-[var(--muted-foreground)]"
-                            >
-                              <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--primary)]" aria-hidden="true" />
-                              <span>{scenario}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          Tools used
-                        </h4>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {study.tools.map((tool) => (
-                            <span
-                              key={tool}
-                              className="rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-[var(--muted-foreground)]"
-                            >
-                              {tool}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                          What was learned
-                        </h4>
-                        <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted-foreground)]">{study.learned}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {study.id === "qa-assistant" ? (
-                    <div className="mt-8 border-t border-white/10 pt-8">
-                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                        Architecture, how a request flows
-                      </h4>
-                      <div className="mt-4 flex flex-wrap items-center gap-3">
-                        {QA_ASSISTANT_FLOW.map((step, stepIndex) => (
-                          <div key={step} className="flex items-center gap-3">
-                            <span
-                              className={`rounded-lg border px-3.5 py-2 text-xs font-semibold transition-colors duration-500 ${
-                                qaFlowStep === stepIndex
-                                  ? "border-[var(--primary)]/60 bg-[var(--primary)]/10 text-[var(--foreground)]"
+                    {study.id === "qa-assistant" && (
+                      <div className="mt-8">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent-secondary)]/40 bg-[var(--accent-secondary)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent-secondary)]">
+                          Roadmap, not shipped
+                        </span>
+                        <div className="mt-4 space-y-2">
+                          {ARCHITECTURE_STEPS.map((step) => (
+                            <button
+                              key={step.id}
+                              type="button"
+                              onClick={() => setActiveArchStep(step.id)}
+                              className={`w-full rounded-lg border px-3 py-2 text-left text-xs font-medium transition-colors duration-200 ${
+                                activeArchStep === step.id
+                                  ? "border-[var(--primary)]/40 bg-[var(--primary)]/10 text-[var(--primary)]"
                                   : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)]"
                               }`}
                             >
-                              {step}
-                            </span>
-                            {stepIndex < QA_ASSISTANT_FLOW.length - 1 ? (
-                              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-[var(--muted-foreground)]/50" aria-hidden="true" />
-                            ) : null}
-                          </div>
-                        ))}
+                              {step.label}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="mt-3 text-xs leading-relaxed text-[var(--muted-foreground)]">
+                          {selectedArchStep.description}
+                        </p>
                       </div>
+                    )}
+                  </div>
 
-                      <div className="mt-6 rounded-xl border border-dashed border-[var(--accent-secondary)]/40 bg-[var(--accent-secondary)]/5 p-5">
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--accent-secondary)]/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[var(--accent-secondary)]">
-                          Roadmap, not yet built
-                        </span>
-                        <ul className="mt-3 space-y-1.5">
-                          {QA_ASSISTANT_ROADMAP.map((item) => (
-                            <li
-                              key={item}
-                              className="flex gap-2 text-sm leading-relaxed text-[var(--muted-foreground)]"
-                            >
-                              <ChevronRight
-                                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--accent-secondary)]"
-                                aria-hidden="true"
-                              />
+                  <div className="space-y-5 text-sm leading-relaxed text-[var(--muted-foreground)]">
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        Product Context
+                      </h4>
+                      <p className="mt-1.5 text-pretty">{study.context}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        Quality Challenge
+                      </h4>
+                      <p className="mt-1.5 text-pretty">{study.challenge}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        Rao's Responsibility
+                      </h4>
+                      <p className="mt-1.5 text-pretty">{study.responsibility}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        Testing Approach
+                      </h4>
+                      <p className="mt-1.5 text-pretty">{study.approach}</p>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        Important Scenarios
+                      </h4>
+                      <ul className="mt-1.5 space-y-1">
+                        {study.scenarios.map((scenario) => (
+                          <li key={scenario} className="flex gap-2">
+                            <Check className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[var(--primary)]" aria-hidden="true" />
+                            <span>{scenario}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--foreground)]">
+                        What Was Learned
+                      </h4>
+                      <p className="mt-1.5 text-pretty">{study.learned}</p>
+                    </div>
+
+                    {study.id === "qa-assistant" && (
+                      <div className="rounded-xl border border-[var(--accent-secondary)]/25 bg-[var(--accent-secondary)]/5 p-5">
+                        <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--accent-secondary)]">
+                          Planned Roadmap
+                        </h4>
+                        <ul className="mt-2.5 space-y-1.5">
+                          {ROADMAP_ITEMS.map((item) => (
+                            <li key={item} className="flex gap-2 text-xs">
+                              <Circle className="mt-1 h-1.5 w-1.5 flex-shrink-0 fill-[var(--accent-secondary)] text-[var(--accent-secondary)]" aria-hidden="true" />
                               <span>{item}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
-                    </div>
-                  ) : null}
+                    )}
+                  </div>
+                </article>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Systems tested */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Systems I Have Tested
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              The workflows most likely to break in production.
+            </h2>
+          </Reveal>
+
+          <div className="mt-12 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+            <Reveal delay={0.05}>
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+                {SYSTEM_NODES.map((node) => (
+                  <button
+                    key={node.id}
+                    type="button"
+                    onClick={() => setActiveNode(node.id)}
+                    aria-pressed={activeNode === node.id}
+                    className={`rounded-xl border px-3 py-3.5 text-left text-xs font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50 ${
+                      activeNode === node.id
+                        ? "border-[var(--primary)]/40 bg-[var(--primary)]/10 text-[var(--primary)]"
+                        : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)] hover:border-white/20 hover:text-[var(--foreground)]"
+                    }`}
+                  >
+                    {node.label}
+                  </button>
+                ))}
+              </div>
+            </Reveal>
+
+            <Reveal delay={0.1}>
+              <motion.div
+                key={selectedNode.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="glass-panel h-full p-7"
+              >
+                <h3 className="font-[family-name:var(--font-display)] text-lg font-semibold">
+                  {selectedNode.label}
+                </h3>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground)]">
+                  Common Quality Risks
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {selectedNode.risks.map((risk) => (
+                    <li key={risk} className="flex gap-2 text-sm text-[var(--muted-foreground)]">
+                      <AlertTriangle className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-[var(--accent-secondary)]" aria-hidden="true" />
+                      <span>{risk}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-5 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
+                  {selectedNode.perspective}
+                </p>
+              </motion.div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      {/* ----------------------------------------------------------------- */}
+      {/* Tools & skills */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="border-t border-white/5 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-6xl">
+          <Reveal>
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Tools & Skills
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Grouped by how they're actually used.
+            </h2>
+          </Reveal>
+
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {TOOL_GROUPS.map((group, index) => (
+              <Reveal key={group.id} delay={index * 0.05}>
+                <div className="glass-panel glass-panel-hover h-full p-6">
+                  <h3 className="font-[family-name:var(--font-display)] text-sm font-semibold uppercase tracking-wider text-[var(--primary)]">
+                    {group.title}
+                  </h3>
+                  <ul className="mt-4 space-y-2.5">
+                    {group.items.map((item) => (
+                      <li key={item} className="text-sm leading-relaxed text-[var(--foreground)]">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </Reveal>
             ))}
@@ -1224,194 +1307,87 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Systems tested */}
-      <section id="systems-tested" className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-        <Reveal>
-          <SectionHeading
-            kicker="Systems I Have Tested"
-            title="Complex workflows, broken down by risk"
-            description="Select a system to see its common quality risks and how I approach testing it."
-          />
-        </Reveal>
-
-        <div className="mt-10 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <Reveal delay={0.05}>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {SYSTEM_NODES.map((node) => {
-                const isActive = node.id === selectedNode;
-                return (
-                  <button
-                    key={node.id}
-                    type="button"
-                    onClick={() => setSelectedNode(node.id)}
-                    aria-pressed={isActive}
-                    className={`rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/50 ${
-                      isActive
-                        ? "border-[var(--primary)]/60 bg-[var(--primary)]/10 text-[var(--foreground)]"
-                        : "border-white/10 bg-white/[0.02] text-[var(--muted-foreground)] hover:border-white/20 hover:text-[var(--foreground)]"
-                    }`}
-                  >
-                    {node.label}
-                  </button>
-                );
-              })}
-            </div>
-          </Reveal>
-
-          <Reveal delay={0.1}>
-            <div className="glass-panel h-full p-6 md:p-8">
-              <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                {activeNode.label}
-              </span>
-              <div className="mt-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--accent-secondary)]">
-                  Common risks
-                </h4>
-                <p className="mt-1.5 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  {activeNode.risks}
-                </p>
-              </div>
-              <div className="mt-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                  My testing perspective
-                </h4>
-                <p className="mt-1.5 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  {activeNode.perspective}
-                </p>
-              </div>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* Experience timeline */}
-      <section id="experience-timeline" className="border-t border-[var(--border)]/40 bg-white/[0.015] px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-6xl">
+      {/* ----------------------------------------------------------------- */}
+      {/* Quality principles */}
+      {/* ----------------------------------------------------------------- */}
+      <section className="border-t border-white/5 bg-white/[0.015] px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-5xl">
           <Reveal>
-            <SectionHeading
-              kicker="Professional Experience"
-              title="Software Development Engineer in Test, DaticsAI"
-            />
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              How I Think About Quality
+            </span>
+            <h2 className="mt-3 max-w-2xl text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Four principles that shape every test plan.
+            </h2>
           </Reveal>
 
-          <div className="mt-10 max-w-3xl">
-            <ol className="relative space-y-7 border-l border-white/10 pl-8">
-              {TIMELINE_RESPONSIBILITIES.map((item, index) => (
-                <Reveal key={item.text} delay={index * 0.04}>
-                  <li className="relative">
-                    <span className="absolute -left-[2.35rem] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 border-[var(--background)] bg-[var(--primary)]" />
-                    <p className="text-pretty text-sm leading-relaxed text-[var(--muted-foreground)] sm:text-base">
-                      {item.text}
-                    </p>
-                  </li>
-                </Reveal>
-              ))}
-            </ol>
+          <div className="mt-12 grid gap-5 md:grid-cols-2">
+            {PRINCIPLES.map((principle, index) => (
+              <Reveal key={principle.id} delay={index * 0.05}>
+                <div className="glass-panel h-full p-7">
+                  <span className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[var(--primary)]">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="mt-4 text-pretty font-[family-name:var(--font-display)] text-lg font-semibold leading-snug">
+                    {principle.title}
+                  </h3>
+                  <p className="mt-3 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
+                    {principle.description}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Tools and skills */}
-      <section id="tools-skills" className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-        <Reveal>
-          <SectionHeading kicker="Tools & Skills" title="Organized by what they actually do" />
-        </Reveal>
-
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-80px" }}
-          className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
-        >
-          {TOOL_GROUPS.map((group) => (
-            <motion.div
-              key={group.heading}
-              variants={fadeInUp}
-              className="glass-panel glass-panel-hover p-6 md:p-8"
-            >
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
-                {group.heading}
-              </h3>
-              <ul className="mt-4 space-y-2.5">
-                {group.items.map((item) => (
-                  <li key={item} className="text-sm leading-relaxed text-[var(--foreground)]">
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* Quality principles */}
-      <section id="quality-principles" className="border-t border-[var(--border)]/40 bg-white/[0.015] px-6 py-24 md:py-32">
-        <div className="mx-auto max-w-6xl">
+      {/* ----------------------------------------------------------------- */}
+      {/* Contact */}
+      {/* ----------------------------------------------------------------- */}
+      <section id="contact" className="border-t border-white/5 px-6 py-24 md:py-32">
+        <div className="mx-auto max-w-3xl text-center">
           <Reveal>
-            <SectionHeading kicker="How I Think About Quality" title="Four principles that guide my work" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-[var(--primary)]">
+              Contact
+            </span>
+            <h2 className="mt-3 text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight md:text-4xl">
+              Let's talk about your next release.
+            </h2>
+            <p className="mt-4 text-pretty leading-relaxed text-[var(--muted-foreground)]">
+              Open to SDET and QA engineer roles. The fastest way to reach me is email.
+            </p>
           </Reveal>
 
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-80px" }}
-            className="mt-10 grid gap-6 sm:grid-cols-2"
-          >
-            {PRINCIPLES.map((principle, index) => (
-              <motion.div
-                key={principle.title}
-                variants={fadeInUp}
-                className="glass-panel glass-panel-hover p-6 md:p-8"
-              >
-                <span className="font-[family-name:var(--font-display)] text-3xl font-semibold text-[var(--primary)]/40">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3 className="mt-3 text-base font-semibold text-[var(--foreground)]">{principle.title}</h3>
-                <p className="mt-2 text-pretty text-sm leading-relaxed text-[var(--muted-foreground)]">
-                  {principle.text}
-                </p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Contact */}
-      <section id="contact" className="mx-auto max-w-6xl px-6 py-24 md:py-32">
-        <Reveal>
-          <div className="glass-panel flex flex-col items-start gap-6 p-8 md:flex-row md:items-center md:justify-between md:p-12">
-            <div className="max-w-xl">
-              <SectionKicker>Get in touch</SectionKicker>
-              <h2 className="mt-3 text-balance font-[family-name:var(--font-display)] text-3xl font-semibold tracking-tight text-[var(--foreground)] sm:text-4xl">
-                Let&apos;s talk about your release risk
-              </h2>
-              <p className="mt-4 text-pretty leading-relaxed text-[var(--muted-foreground)]">
-                Open to SDET and QA roles. Reach out by email or connect on LinkedIn, I
-                read every message myself.
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
+          <Reveal delay={0.1}>
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <a
                 href={`mailto:${EMAIL}`}
-                className="btn-primary-glow inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[#0B0E11] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/60"
+                className="btn-primary-glow inline-flex items-center gap-2 rounded-full bg-[var(--primary)] px-6 py-3 text-sm font-semibold text-[var(--background)] transition-transform duration-300 hover:-translate-y-0.5"
               >
                 <Mail className="h-4 w-4" aria-hidden="true" />
-                Email Me
+                {EMAIL}
               </a>
               <a
                 href={LINKEDIN_URL}
                 target="_blank"
                 rel="noreferrer"
-                className="btn-secondary-outline inline-flex min-h-11 items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-[var(--foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/40"
+                className="btn-secondary-outline inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition-colors duration-300 hover:border-white/30"
               >
                 <Linkedin className="h-4 w-4" aria-hidden="true" />
                 LinkedIn
               </a>
+              <a
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary-outline inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-[var(--foreground)] transition-colors duration-300 hover:border-white/30"
+              >
+                <Github className="h-4 w-4" aria-hidden="true" />
+                GitHub
+              </a>
             </div>
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
       </section>
     </main>
   );
